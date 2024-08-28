@@ -157,16 +157,16 @@ if __name__ == '__main__':
     make_dir(f"data/data_res/results_opti/results{args.factor}/imbalance_costs_daily_benchmark")
 
 
-    path = f"data/data_res/results_opti/results{args.factor}/ds_costs_daily_optimisation/{args.id}"
+    path = f"data/data_res/results_opti/results{args.factor}/ds_costs_daily_optimisation/{args.id}.pkl"
     with open(path, 'wb') as file:
         pickle.dump(ds_costs, file)
-    path = f"data/data_res/results_opti/results{args.factor}/imbalance_costs_daily_optimisation/{args.id}"
+    path = f"data/data_res/results_opti/results{args.factor}/imbalance_costs_daily_optimisation/{args.id}.pkl"
     with open(path, 'wb') as file:
         pickle.dump(imbalance_costs, file)
-    path = f"data/data_res/results_opti/results{args.factor}/ds_costs_daily_benchmark/{args.id}"
+    path = f"data/data_res/results_opti/results{args.factor}/ds_costs_daily_benchmark/{args.id}.pkl"
     with open(path, 'wb') as file:
         pickle.dump(ds_costs_benchi, file)
-    path = f"data/data_res/results_opti/results{args.factor}/imbalance_costs_daily_benchmark/{args.id}"
+    path = f"data/data_res/results_opti/results{args.factor}/imbalance_costs_daily_benchmark/{args.id}.pkl"
     with open(path, 'wb') as file:
         pickle.dump(imbalance_costs_benchi, file)
 
@@ -175,10 +175,10 @@ if __name__ == '__main__':
     make_dir(f"data/data_res/results_opti/results{args.factor}/uni_soe_test")
     make_dir(f"data/data_res/results_opti/results{args.factor}/uni_soe_train")
 
-    path = f"data/data_res/results_opti/results{args.factor}/uni_soe_test/{args.id}"
+    path = f"data/data_res/results_opti/results{args.factor}/uni_soe_test/{args.id}.pkl"
     with open(path, 'wb') as file:
         pickle.dump(soe_test, file)
-    path = f"data/data_res/results_opti/results{args.factor}/uni_soe_train/{args.id}"
+    path = f"data/data_res/results_opti/results{args.factor}/uni_soe_train/{args.id}.pkl"
     with open(path, 'wb') as file:
         pickle.dump(soe_train, file)
 

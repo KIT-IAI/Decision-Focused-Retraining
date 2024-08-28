@@ -1,6 +1,3 @@
-# Write a main method for the Optinet class that reads in the data from the data folder which are given in pickel format
-# afterwards use the data to train an neural network.
-
 
 
 
@@ -45,15 +42,16 @@ LOSS_FUNCTION = [
     "Pinball_0.9",
 ]
 
-DATATSETS = {
+DATASET = {
     "train" : "",
     "test" : "_2.",
     "val" : ""
 }
+
 #
 # Daset bound train to val avoiding overlap of 42 hours and Databounds test fitting to model evaluation of dfr
 #
-DATATSET_BOUNDS = {
+DATASET_BOUNDS = {
         "train" : (pd.to_datetime("2010-07-08 12:00:00"), pd.to_datetime("2012-02-02")),
         "val" : (pd.to_datetime("2012-02-04 12:00:00"), pd.to_datetime("2012-06-28")),
         "test" : (pd.to_datetime("2012-07-08 12:00:00"), pd.to_datetime("2013-06-28"))
@@ -84,19 +82,19 @@ def get_data(id,factor=None):
 
     if factor != None:
         # Get the cost data and the SoE at the beginning of the day (Replacement for estimated SoE)
-        ds_costs = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor + "/ds_costs_daily_optimisation/" + str(id), "rb"))
-        imbalance_costs = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor +"/imbalance_costs_daily_optimisation/" + str(id) , "rb"))
+        ds_costs = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor + "/ds_costs_daily_optimisation/" + str(id) + ".pkl", "rb"))
+        imbalance_costs = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor +"/imbalance_costs_daily_optimisation/" + str(id) + ".pkl" , "rb"))
 
         # Get the SoE at the beginning of the day (Replacement for estimated SoE)
-        train_soe = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor +"/uni_soe_train/" + str(id) , "rb"))
+        train_soe = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor +"/uni_soe_train/" + str(id) + ".pkl" , "rb"))
     else:
         print("No Factor Specified")
 
 
     soe = {}
-    soe["train"] = train_soe[0][DATATSET_BOUNDS["train"][0]:DATATSET_BOUNDS["train"][1]]
-    soe["val"] = train_soe[0][DATATSET_BOUNDS["val"][0]:DATATSET_BOUNDS["val"][1]]
-    soe["test"] = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor + "/uni_soe_test/" + str(id) , "rb"))[0][DATATSET_BOUNDS["test"][0]:DATATSET_BOUNDS["test"][1]]
+    soe["train"] = train_soe[0][DATASET_BOUNDS["train"][0]:DATASET_BOUNDS["train"][1]]
+    soe["val"] = train_soe[0][DATASET_BOUNDS["val"][0]:DATASET_BOUNDS["val"][1]]
+    soe["test"] = pickle.load(open("data/"+ RESULTS_FOLDER + "/" + factor + "/uni_soe_test/" + str(id) + ".pkl" , "rb"))[0][DATASET_BOUNDS["test"][0]:DATASET_BOUNDS["test"][1]]
 
     # Get the total costs for val train and test
 
@@ -109,32 +107,32 @@ def get_data(id,factor=None):
                 tmp_key = "val"
                 total_costs_per_loss = ds_costs[key][loss_function] +IMBALANCE_FACTOR* imbalance_costs[key][loss_function]
                 # VAL and Train
-                total_costs[key][loss_function] = total_costs_per_loss[DATATSET_BOUNDS[key][0]:DATATSET_BOUNDS[key][1]]
-                total_costs[tmp_key][loss_function] = total_costs_per_loss[DATATSET_BOUNDS[tmp_key][0]:DATATSET_BOUNDS[tmp_key][1]]
+                total_costs[key][loss_function] = total_costs_per_loss[DATASET_BOUNDS[key][0]:DATASET_BOUNDS[key][1]]
+                total_costs[tmp_key][loss_function] = total_costs_per_loss[DATASET_BOUNDS[tmp_key][0]:DATASET_BOUNDS[tmp_key][1]]
             else:
                 total_costs_per_loss = ds_costs[key][loss_function] + IMBALANCE_FACTOR* imbalance_costs[key][loss_function]
-                total_costs[key][loss_function] = total_costs_per_loss[DATATSET_BOUNDS[key][0]:DATATSET_BOUNDS[key][1]]
+                total_costs[key][loss_function] = total_costs_per_loss[DATASET_BOUNDS[key][0]:DATASET_BOUNDS[key][1]]
 
     # Get the forecast data
     forecasts = {}
-    for dataset in DATATSETS:
+    for dataset in DATASET:
         forecasts[dataset] = {}
         for method in FORECASTING_METHOD:
             forecasts[dataset][method] = {}
             for loss_function in LOSS_FUNCTION:
                 if factor != None:
-                    forecast = pd.read_csv(glob.glob("data/"+ FORECAST_FOLDER + "/" + str(factor) + "/"+ str(id)+ "/*" "/result_" + method + "_" + loss_function + DATATSETS[dataset]  + ".csv")[0], index_col=0, parse_dates=True)
+                    forecast = pd.read_csv(glob.glob("data/"+ FORECAST_FOLDER + "/" + str(factor) + "/"+ str(id)+ "/*" "/result_" + method + "_" + loss_function + DATASET[dataset]  + ".csv")[0], index_col=0, parse_dates=True)
                 else:
                     print("No Factor Specified")
                 
-                forecasts[dataset][method][loss_function] = forecast[DATATSET_BOUNDS[dataset][0]:DATATSET_BOUNDS[dataset][1]]
+                forecasts[dataset][method][loss_function] = forecast[DATASET_BOUNDS[dataset][0]:DATASET_BOUNDS[dataset][1]]
 
     # get the ground truth data
     ground_truth = {}
-    for dataset in DATATSETS:
+    for dataset in DATASET:
         ground_truth[dataset] = {}
         if factor != None:
-            ground_truth[dataset] = pd.read_csv(glob.glob("data/"+ FORECAST_FOLDER + "/" + str(factor) +"/"+ str(id)+ "/*/gt_forecast" + DATATSETS[dataset]  + ".csv")[0], index_col=0,parse_dates=True)[DATATSET_BOUNDS[dataset][0]:DATATSET_BOUNDS[dataset][1]]
+            ground_truth[dataset] = pd.read_csv(glob.glob("data/"+ FORECAST_FOLDER + "/" + str(factor) +"/"+ str(id)+ "/*/gt_forecast" + DATASET[dataset]  + ".csv")[0], index_col=0,parse_dates=True)[DATASET_BOUNDS[dataset][0]:DATASET_BOUNDS[dataset][1]]
         else:
             print("No Factor Specified")
 
@@ -334,8 +332,8 @@ if __name__ == "__main__":
     "val_buildings": [i for i in range(51,101)],
     "test_buildings": [i for i in range(101,301)],
     "epochs": 100,
-    "Datasets": DATATSETS,
-    "Dataset_bounds": DATATSET_BOUNDS,
+    "Datasets": DATASET,
+    "Dataset_bounds": DATASET_BOUNDS,
     "Imbalance_factor": IMBALANCE_FACTOR,
     "Forecasting_methods": FORECASTING_METHOD,
     "Loss_functions": LOSS_FUNCTION,

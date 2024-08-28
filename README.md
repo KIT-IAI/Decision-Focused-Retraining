@@ -48,7 +48,7 @@ Further, make sure that Ipopt is properly installed. For more details, look here
 
 Disclaimer. The actual code is not runnable, as the data is missing due to a missing data statement of the [Ausgrid Dataset](https://www.ausgrid.com.au/Industry/Our-Research/Data-to-share/Solar-home-electricity-data) we are using.
 
-You can generate similar data following the 'generate_data_setup.iypnb' in addition to this you need to build up own forecasts, and run the optimisation problem by using the file "src/main_optimisation_dataset_creation.py" 
+You can generate similar data following the 'generate_data_setup.iypnb' in addition to this you need to build up own forecasts, and run the optimisation problem by using the file "src/main_optimisation_dataset_creation.py". You may need to adjust file paths.
 
 ## Funding
 
@@ -57,3 +57,8 @@ This project is funded by the Helmholtz Association’s Initiative and Networkin
 ## License
 
 This code is licensed under the [MIT License](LICENSE).
+
+## Changelog
+
+V2: Typo Fixes, Cleanup, Computational Cheaper Quantile Loss implementation. Prosumption Factor added to create the Paper (https://doi.org/10.1145/3632775.3661952), the Prosumption Factor 0.5 was used. 
+

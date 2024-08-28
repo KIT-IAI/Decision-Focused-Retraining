@@ -27,30 +27,17 @@ from torch.nn import ParameterList
 # 
 #
 
-IMBALANCE_FACTOR = 10
 
 
-FORECASTING_METHOD = [
-    ""
-]
+PROSUMPTION_FACTOR = 0.5
 
-LOSS_FUNCTION = [
-    "Huber",
-    "MSE",
-    "MAE",
-    "Pinball_0.1",
-    "Pinball_0.25",
-    "Pinball_0.75",
-    "Pinball_0.9",
-]
-
-DATATSETS = {
+DATASETS = {
     "train" : "",
     "test" : "_2.",
     "val" : ""
 }
 
-DATATSET_BOUNDS = {
+DATASET_BOUNDS = {
         "train" : (pd.to_datetime("2010-07-08 12:00:00"), pd.to_datetime("2011-07-08")),
         "val" : (pd.to_datetime("2011-07-08 12:00:00"), pd.to_datetime("2012-06-28")),
         "test" : (pd.to_datetime("2012-07-08 12:00:00"), pd.to_datetime("2013-06-28"))
@@ -84,8 +71,8 @@ def get_data(id):
     # Get the calendar data
 
     calendar = {}
-    for dataset in DATATSETS:
-        calendar[dataset] = pd.read_csv(glob.glob("data/calendar_slices/calendar_calendar_slice" + DATATSETS[dataset] + ".csv")[0],parse_dates=["time"], index_col="time")
+    for dataset in DATASETS:
+        calendar[dataset] = pd.read_csv(glob.glob("data/calendar_slices/calendar_slice" + DATASETS[dataset] + ".csv")[0],parse_dates=["time"], index_col="time")
 
     # concat train test calendar and remove the duplicates
     calendar_merged = pd.concat([calendar["train"], calendar["test"]])
@@ -110,13 +97,13 @@ def get_data(id):
    
     # Get historical Data
 
-    data_ausgrid = pd.read_csv("data/ausgrid_solar_home_dataset/ausgrid_prosumption.csv", parse_dates=["time"], index_col="time").resample("1h").mean()[str(id)]
+    data_ausgrid = pd.read_csv("data/ausgrid_solar_home_dataset/ausgrid_prosumption.csv", parse_dates=["time"], index_col="time").resample("1h", closed='right').sum()[str(id)] * PROSUMPTION_FACTOR
     
     # get the ground truth data
     ground_truth = {}
-    for dataset in DATATSETS:
+    for dataset in DATASETS:
         ground_truth[dataset] = {}
-        ground_truth[dataset] = pd.read_csv(glob.glob("data/"+ FORECAST_FOLDER +"/"+ str(id)+ "/*/gt_forecast" + DATATSETS[dataset]  + ".csv")[0], index_col=0,parse_dates=True)[DATATSET_BOUNDS[dataset][0]:DATATSET_BOUNDS[dataset][1]]
+        ground_truth[dataset] = pd.read_csv(glob.glob("data/"+ FORECAST_FOLDER +"/"+ str(id)+ "/*/gt_forecast" + DATASETS[dataset]  + ".csv")[0], index_col=0,parse_dates=True)[DATASET_BOUNDS[dataset][0]:DATASET_BOUNDS[dataset][1]]
 
     #slice the historical data according to the ground truth data get the 168 values from index before the first ground truth value
     data_ausgrid = data_ausgrid[ground_truth["train"].index[0] - datetime.timedelta(hours=168):]
@@ -164,9 +151,9 @@ def get_data(id):
     soe_benchi = benchi.results_online_final["e"]["house0"][0]
     soe_benchi_2 = benchi_2.results_online_final["e"]["house0"][0]
 
-    soe_train = soe_benchi[DATATSET_BOUNDS["train"][0]:DATATSET_BOUNDS["train"][1]]
-    soe_val = soe_benchi[DATATSET_BOUNDS["val"][0]:DATATSET_BOUNDS["val"][1]]
-    soe_test = soe_benchi_2[DATATSET_BOUNDS["test"][0]:DATATSET_BOUNDS["test"][1]]
+    soe_train = soe_benchi[DATASET_BOUNDS["train"][0]:DATASET_BOUNDS["train"][1]]
+    soe_val = soe_benchi[DATASET_BOUNDS["val"][0]:DATASET_BOUNDS["val"][1]]
+    soe_test = soe_benchi_2[DATASET_BOUNDS["test"][0]:DATASET_BOUNDS["test"][1]]
 
 
     # returning a dictionary with the data
@@ -368,10 +355,8 @@ if __name__ == "__main__":
     "test_building": args.id,
     "val_building": args.id,
     "epochs": 1000,
-    "Datasets": DATATSETS,
-    "Dataset_bounds": DATATSET_BOUNDS,
-    "Forecasting_methods": FORECASTING_METHOD,
-    "Loss_functions": LOSS_FUNCTION,
+    "Datasets": DATASETS,
+    "Dataset_bounds": DATASET_BOUNDS,
     "Results_folder": RESULTS_FOLDER,
     "Forecast_folder": FORECAST_FOLDER,
     "Model_save_folder": MODEL_SAVE_FOLDER,
@@ -550,7 +535,7 @@ if __name__ == "__main__":
 
             save_results = pd.DataFrame(outputs, columns=[str(i) for i in range(0,42)])
             #get the index
-            save_results["time"] = pd.date_range(start=DATATSET_BOUNDS["test"][0], end=DATATSET_BOUNDS["test"][1], freq="1d")
+            save_results["time"] = pd.date_range(start=DATASET_BOUNDS["test"][0], end=DATASET_BOUNDS["test"][1], freq="1d")
             save_results = save_results.set_index("time")
 
             #save save_results
@@ -558,7 +543,7 @@ if __name__ == "__main__":
 
             save_results = pd.DataFrame(y_batch, columns=[str(i) for i in range(0,42)])
             #get the index
-            save_results["time"] = pd.date_range(start=DATATSET_BOUNDS["test"][0], end=DATATSET_BOUNDS["test"][1], freq="1d")
+            save_results["time"] = pd.date_range(start=DATASET_BOUNDS["test"][0], end=DATASET_BOUNDS["test"][1], freq="1d")
             save_results = save_results.set_index("time")
 
             #save save_results
@@ -755,7 +740,7 @@ if __name__ == "__main__":
 
             save_results = pd.DataFrame(outputs, columns=[str(i) for i in range(0,42)])
             #get the index
-            save_results["time"] = pd.date_range(start=DATATSET_BOUNDS["test"][0], end=DATATSET_BOUNDS["test"][1], freq="1d")
+            save_results["time"] = pd.date_range(start=DATASET_BOUNDS["test"][0], end=DATASET_BOUNDS["test"][1], freq="1d")
             save_results = save_results.set_index("time")
             #save save_results
             save_results.to_csv(RESULTS_FOLDER_RETRAINING + "/"+ str(args.run_name) + "/" + str(args.id) + "/" +  "fc_retraining.csv")

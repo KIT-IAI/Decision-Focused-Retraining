@@ -72,6 +72,8 @@ if __name__ == '__main__':
 
     config=config,
     )
+    # Set string for saving
+    str_dataset = 'test'
 
     #
     # Create result folder if not existent
@@ -104,11 +106,6 @@ if __name__ == '__main__':
         optimisation.run_deterministic_different_forecasts([optimisation.e_max["house0"] / 2], [forecast_path], [forecast_path], actual_path_test, START_DATE,
                                      END_DATE)
 
-
-        # Set string for saving
-        str_dataset = 'test'
-
-
         pickle_opimisation(optimisation, optimisation_path +"/"+ str_loss + ".pkl")
 
 
@@ -124,15 +121,15 @@ if __name__ == '__main__':
         imbalance_costs_optimisation[str_dataset] = pd.concat(
             [imbalance_costs_optimisation[str_dataset], optimisation.imbalance_costs_daily.rename(str_loss)], axis=1)
         
-    wandb.log({"ds_costs_optimisation": ds_costs_optimisation["test"], "imbalance_costs_optimisation": imbalance_costs_optimisation["test"]})
+    wandb.log({"ds_costs_optimisation": ds_costs_optimisation[str_dataset], "imbalance_costs_optimisation": imbalance_costs_optimisation[str_dataset]})
     for string in strings_runs:
-        wandb.log({f"ds_costs_optimisation_{string}": ds_costs_optimisation["test"][string].values.mean()})
-        wandb.log({f"imbalance_costs_optimisation_{string}": imbalance_costs_optimisation["test"][string].values.mean()})
-        total_costs = ds_costs_optimisation["test"][string].values + 10 * imbalance_costs_optimisation["test"][string].values
+        wandb.log({f"ds_costs_optimisation_{string}": ds_costs_optimisation[str_dataset][string].values.mean()})
+        wandb.log({f"imbalance_costs_optimisation_{string}": imbalance_costs_optimisation[str_dataset][string].values.mean()})
+        total_costs = ds_costs_optimisation[str_dataset][string].values + 10 * imbalance_costs_optimisation[str_dataset][string].values
         wandb.log({f"total_costs_{string}": total_costs.mean()})
     # Saving cost dicts
-    path_ds = f"results_optimisation/{args.run_name}/{args.id}/ds_costs_daily_optimisation"
-    path_imbalance = f"results_optimisation/{args.run_name}/{args.id}/imbalance_costs_daily_optimisation"
+    path_ds = f"results_optimisation/{args.run_name}/{args.id}/ds_costs_daily_optimisation/ds.pkl"
+    path_imbalance = f"results_optimisation/{args.run_name}/{args.id}/imbalance_costs_daily_optimisation/imb.pkl"
 
     make_dir(f"results_optimisation/{args.run_name}/{args.id}")
     with open(path_ds, 'wb') as file:
