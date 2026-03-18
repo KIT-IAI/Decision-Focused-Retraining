@@ -60,6 +60,7 @@ This code is licensed under the [MIT License](LICENSE).
 
 ## Changelog
 
-V2: Typo Fixes, Cleanup, Computational Cheaper Quantile Loss implementation. Prosumption Factor added to create the Paper (https://doi.org/10.1145/3632775.3661952), the Prosumption Factor 0.5 was used. 
-V3: Fixes Logging and Monitoring in Losses during training and small cleanup.
+- V2: Typo Fixes, Cleanup, Computational Cheaper Quantile Loss implementation. Prosumption Factor added to create the Paper (https://doi.org/10.1145/3632775.3661952), the Prosumption Factor 0.5 was used. 
+
+- V3: Fixes Logging and Monitoring in Losses during training and small cleanup.
 
