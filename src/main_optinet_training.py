@@ -1,6 +1,3 @@
-
-
-
 # import the necessary packages
 import glob
 import datetime
@@ -423,8 +420,9 @@ if __name__ == "__main__":
     val_losses_epoch = []
     # define the training loop
     for epoch in range(epochs):
+        network.train()
+        losses = []
         for i, data in enumerate(train_loader, 0):
-            losses = []
             # get the inputs
             x_batch, y_batch = data
 
@@ -454,11 +452,10 @@ if __name__ == "__main__":
 
         # print statistics
         print("Epoch: ", epoch, " Loss: ", np.asarray(losses).mean())
-
+        network.eval()
         val_losses = []
         # define the validation loop
         for i, data in enumerate(val_loader, 0):
-            val_losses = []
             # get the inputs
             x_batch, y_batch = data
             x_batch = x_batch.to("cuda")    
@@ -486,13 +483,19 @@ if __name__ == "__main__":
             break
     network = tmp_model       
     
-    # define the test
+    # Evaluate the model on the test set
+
+    network.eval()
     test_loss_MSE = []
     test_loss_MAE = []
-
     test_loss_MAE_scaled = []
-    test_loss_MSE_scaled = [] 
+    test_loss_MSE_scaled = []
+
     for i, data in enumerate(test_loader, 0):
+        # this only gets executed once since the batch size is equal to the length of the test dataset,
+        # so we get all the test data at once and do the evaluation on it. 
+        # It is keept the same way for consitency with the training and validation loop.
+
         # get the inputs
 
         x_batch, y_batch = data

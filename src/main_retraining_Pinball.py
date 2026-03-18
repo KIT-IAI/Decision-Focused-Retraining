@@ -1,8 +1,3 @@
-
-
-
-
-
 # import the necessary packages
 import copy
 import glob
@@ -435,9 +430,9 @@ if __name__ == "__main__":
     val_losses_epoch = [] 
     # define the training loop
     for epoch in range(epochs):
-        network.train() 
+        network.train()
+        losses = []
         for i, data in enumerate(train_loader, 0):
-            losses = []
             # get the inputs
             x_batch, y_batch , exog_batch = data
 
@@ -463,7 +458,8 @@ if __name__ == "__main__":
         # define the validation loop
         network.eval()
         for i, data in enumerate(val_loader, 0):
-            val_losses = []
+            # print("Validation: ", i, "This skips after the first batch because the val loader has only one batch with all the data")
+
             # get the inputs
             x_batch, y_batch ,exog_batch = data
             x_batch = x_batch.to("cuda")    
@@ -501,7 +497,12 @@ if __name__ == "__main__":
     test_loss_used = []
 
     network.eval()
+
     for i, data in enumerate(test_loader, 0):
+        # this only gets executed once since the batch size is equal to the length of the test dataset,
+        # so we get all the test data at once and do the evaluation on it. 
+        # It is keept the same way for consitency with the training and validation loop.
+      
         # get the inputs
 
         x_batch, y_batch, exog_batch = data
@@ -546,7 +547,7 @@ if __name__ == "__main__":
             save_results = save_results.set_index("time")
 
             #save save_results
-            save_results.to_csv(RESULTS_FOLDER_RETRAINING + "/"+ args.run_name + "/" + str(args.id) + "/" + "/" +  "gt.csv")
+            save_results.to_csv(RESULTS_FOLDER_RETRAINING + "/"+ args.run_name + "/" + str(args.id) + "/" +  "gt.csv")
 
         
 
@@ -595,6 +596,7 @@ if __name__ == "__main__":
 
     for name, param in network_retrain.named_parameters():
         if name.startswith("OptiEstimator"):
+            print("Freezing: ", name)
             param.requires_grad = False
     
     summary(network_retrain, [(training_data.features.shape[1],), (42,), (5,)])
@@ -618,10 +620,11 @@ if __name__ == "__main__":
     # define the training loop
     for epoch in range(epochs):
         network_retrain.train()
+        losses = []
+        losses_fc = []
+        losses_op_est = []
         for i, data in enumerate(train_loader, 0):
-            losses = []
-            losses_fc = []
-            losses_op_est = []
+
             # get the inputs
             x_batch, y_batch , exog_batch = data
 
@@ -659,6 +662,7 @@ if __name__ == "__main__":
         val_losses_op_est = []
         # define the validation loop
         for i, data in enumerate(val_loader, 0):
+            # print("Validation: ", i, "This skips after the first batch because the val loader has only one batch with all the data")
 
             # get the inputs
             x_batch, y_batch , exog_batch = data
@@ -707,7 +711,11 @@ if __name__ == "__main__":
     test_loss_op_est = []
     test_loss_used = []
     network_retrain.eval()
+    
     for i, data in enumerate(test_loader, 0):
+        # this only gets executed once since the batch size is equal to the length of the test dataset,
+        # so we get all the test data at once and do the evaluation on it. 
+        # It is keept the same way for consitency with the training and validation loop.
         # get the inputs
 
         x_batch, y_batch , exog_batch = data
